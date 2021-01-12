@@ -1,66 +1,121 @@
-// const battleship = () => {
-//   return 'The winner is...?'
-// }
 
-// const gameResult = battleship()
+//initialize variables
+let myGridSize = prompt('What size would you like your grid to be?');
+let enemyGridSize = prompt('What size would you like your enemy grid to be?');
+let myGrid = createGrid(myGridSize);
+let enemyGrid = createGrid(enemyGridSize);
+let myShips = 3;
+let enemyShips = 3;
+let enemyLocations = {};
 
-// const htmlTarget = document.getElementById('result')
-// htmlTarget.innerHTML = gameResult
-let myGridSize=prompt("enter the size of your grid");
-let EnemyGridSize=prompt("enter the size of the enemy grid");
-
-let myGrid=createGrid(myGridSize);
-let EnemyGrid=createGrid(EnemyGridSize)
-let myShip=3;
-let enemyShip=3;
+printGrid(enemyGrid, true);
 printGrid(myGrid);
-printGrid(EnemyGrid,true);
 
-
-for(let i=1;i<5;i++){
-  let x=prompt("Enter x coordinate for your ship#",i)
-  let y = prompt("Enter y coordinate for your ship#",i)
-  placeCharacter(x,y,'0',myGrid);
-
+//game setup
+for (let i = 1; i < 4; i++) {
+  let x = prompt('Enter the x coordinate for your ship number ' + i);
+  let y = prompt('Enter the y coordinate for your ship number ' + i);
+  placeCharacter(x, y, 'O', myGrid);
+  placeRandomCharacter('O', enemyGrid, enemyGridSize);
+  drawBreak();
+  printGrid(enemyGrid, true);
   printGrid(myGrid);
-printGrid(EnemyGrid,true);
 }
 
+//game loop
+while (enemyShips > 0 && myShips > 0) {
+  let x = prompt('Enter the x coordinate for your attack');
+  let y = prompt('Enter the y coordinate for your attack');
 
-function createGrid(size){
-  let grid=[];
-  for(let i = 0;i < size;i++){
-    grid[i]=[];
-    for(let j = 0;j < size;j++){
-      grid[i][j] ='-';
+  if (attack(x, y, enemyGrid)) {
+    enemyShips--;
+  }
+
+  x = getRandomInt(myGridSize);
+  y = getRandomInt(myGridSize);
+  if (enemyShips > 0 && attack(x, y, myGrid)) {
+    myShips--;
+  }
+
+  drawBreak();
+  printGrid(enemyGrid, true);
+  printGrid(myGrid);
+}
+
+if (myShips < enemyShips) {
+  console.log('Lose it all!');
+} else {
+  console.log('Victory!!!');
+}
+
+function createGrid(size) {
+  let grid = [];
+  for (let i = 0; i < size; i++) {
+    grid[i] = [];
+    for (let j = 0; j < size; j++) {
+      grid[i][j] = '-';
     }
   }
   return grid;
 }
-function printGrid(grid,isEnemy=false){
-  const header = createHeader(grid.length);
-  console.log(header);
-  for(let i=0;i<grid.length;i++){
-    let rowStr = i + " ";
-    for(let cell of grid[i]){
-      if(isEnemy && cell == '0'){
-        rowStr += '-'
-      }else{
+
+function printGrid(grid, isEnemy = false) {
+  const headers = createHeaders(grid.length);
+  console.log(headers);
+  for (let i = 0; i < grid.length; i++) {
+    let rowStr = i + ' ';
+    for (let cell of grid[i]) {
+      if (isEnemy && cell == 'O') {
+        rowStr += '- ';
+      } else {
         rowStr += cell + ' ';
       }
     }
     console.log(rowStr);
   }
 }
-function createHeader(size){
-  let result = ' ';
-  for(let i=0;i<size;i++){
-    result +=i +" ";
-    
-    }
-    return result;
+
+function createHeaders(size) {
+  let result = '  ';
+  for (let i = 0; i < size; i++) {
+    result += i + ' ';
   }
-  
-function placeCharacter(x,y,c,grid){
-  grid[y,x]=c
+  return result;
+}
+
+function placeCharacter(x, y, c, grid) {
+  grid[y][x] = c;
+}
+
+function placeRandomCharacter(c, grid, max) {
+  let didPlace = false;
+  while (!didPlace) {
+    let x = getRandomInt(max);
+    let y = getRandomInt(max);
+    if (!enemyLocations[`${x}-${y}`]) {
+      placeCharacter(x, y, c, grid);
+      didPlace = true;
+      enemyLocations[`${x}-${y}`] = true;
+    }
+  }
+}
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+
+function attack(x, y, grid) {
+  if (grid[y][x] == 'O') {
+    grid[y][x] = '!';
+    return true;
+  } else if (grid[y][x] == '-') {
+    grid[y][x] = 'x';
+    return false;
+  } else {
+    return false;
+  }
+}
+
+function drawBreak() {
+  console.log('---------------------------------');
 }
